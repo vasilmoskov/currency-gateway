@@ -1,3 +1,28 @@
 spring:
   application:
     name: gateway
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: false
+        hbm2ddl:
+          auto: update
+  datasource:
+    url: jdbc:postgresql://localhost:5432/currency_gateway
+    username: postgres
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+rates-collector:
+  interval: 300000
+
+fixer:
+  api:
+    key: ${FIXER_API_KEY}
+
+logging:
+  level:
+    com.example.gateway.scheduler.RatesCollectorScheduler: DEBUG
+    com.example.gateway.service.CurrencyRateServiceImpl: DEBUG
+    com.example.gateway.client.FixerClient: DEBUG
