@@ -1,6 +1,6 @@
 package com.example.gateway.client;
 
-import com.example.gateway.dto.FixerResponse;
+import com.example.gateway.dto.response.FixerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

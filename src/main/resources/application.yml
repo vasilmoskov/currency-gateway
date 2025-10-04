@@ -23,6 +23,7 @@ fixer:
 
 logging:
   level:
-    com.example.gateway.scheduler.RatesCollectorScheduler: DEBUG
-    com.example.gateway.service.CurrencyRateServiceImpl: DEBUG
     com.example.gateway.client.FixerClient: DEBUG
+    com.example.gateway.scheduler.RatesCollectorScheduler: DEBUG
+    com.example.gateway.service.impl.CurrencyRateServiceImpl: DEBUG
+    com.example.gateway.service.impl.RequestStatServiceImpl: DEBUG
