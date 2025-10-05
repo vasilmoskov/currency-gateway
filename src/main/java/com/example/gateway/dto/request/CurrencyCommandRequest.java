@@ -1,5 +1,6 @@
 package com.example.gateway.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -23,9 +24,11 @@ public class CurrencyCommandRequest {
     @XmlAttribute
     private String id;
 
+    @Valid
     @XmlElement
     private GetRequest get;
 
+    @Valid
     @XmlElement
     private HistoryRequest history;
 }
