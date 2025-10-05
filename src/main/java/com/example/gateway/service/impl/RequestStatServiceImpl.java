@@ -6,6 +6,8 @@ import com.example.gateway.service.RequestStatService;
 import com.example.gateway.util.ServiceName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,10 +17,17 @@ import java.time.Instant;
 public class RequestStatServiceImpl implements RequestStatService {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestStatServiceImpl.class);
 
-    private final RequestStatRepository requestStatRepository;
+    private static final String REQUEST_RECEIVED_ROUTING_KEY = "request.received";
 
-    public RequestStatServiceImpl(RequestStatRepository requestStatRepository) {
+    private final RequestStatRepository requestStatRepository;
+    private final AmqpTemplate amqpTemplate;
+
+    @Value("${app.rabbitmq.exchange}")
+    private String exchangeName;
+
+    public RequestStatServiceImpl(RequestStatRepository requestStatRepository, AmqpTemplate amqpTemplate) {
         this.requestStatRepository = requestStatRepository;
+        this.amqpTemplate = amqpTemplate;
     }
 
     @Override
@@ -42,5 +51,14 @@ public class RequestStatServiceImpl implements RequestStatService {
         LOGGER.debug("Saving request stat: {}.", stat);
 
         requestStatRepository.save(stat);
+
+        LOGGER.debug("Publishing message {} to RabbitMQ.", stat);
+
+        try {
+            amqpTemplate.convertAndSend(exchangeName, REQUEST_RECEIVED_ROUTING_KEY, stat);
+            LOGGER.info("Published request stat to RabbitMQ: {}.", stat);
+        } catch (Exception e) {
+            LOGGER.error("Failed to publish message to RabbitMQ.", e);
+        }
     }
 }
