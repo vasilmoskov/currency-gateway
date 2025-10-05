@@ -1,6 +1,8 @@
 package com.example.gateway.exception;
 
 import com.example.gateway.dto.response.ErrorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,6 +16,7 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
@@ -42,8 +45,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleAll() {
-        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred.", null);
+    public ResponseEntity<ErrorResponse> handleAll(Exception e) {
+        String errorMessage = "Unexpected error occurred.";
+        LOGGER.error(errorMessage, e);
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, null);
     }
 
     private ResponseEntity<ErrorResponse> buildError(HttpStatus httpStatus, String message, List<String> errors) {

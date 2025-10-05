@@ -12,6 +12,7 @@ import com.example.gateway.repository.CurrencyRateRepository;
 import com.example.gateway.service.CurrencyRateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,8 +67,9 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
         }
     }
 
-    @Transactional(readOnly = true)
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = "currentRates", key = "#baseCurrency")
     public CurrentCurrencyRatesResponse getCurrentRatesForCurrency(String baseCurrency) {
         LOGGER.debug("Fetching latest currency rates for {}.", baseCurrency);
 
@@ -88,6 +90,8 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = "historyRates", key = "#baseCurrency + '_' + #period")
     public HistoryCurrencyRatesResponse getHistoryRatesForCurrency(String baseCurrency, Integer period) {
         LOGGER.debug("Validating whether {} exist as base currency.", baseCurrency);
 
