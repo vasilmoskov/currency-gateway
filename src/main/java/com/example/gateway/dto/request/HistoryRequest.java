@@ -3,6 +3,9 @@ package com.example.gateway.dto.request;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,16 +15,15 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CurrencyRatesRequest {
-    @NotBlank
-    private String requestId;
-
-    private Long timestamp;
+@XmlAccessorType(XmlAccessType.FIELD)
+public class HistoryRequest {
 
     @NotBlank
-    private String client;
+    @XmlAttribute
+    private String consumer;
 
     @NotBlank
+    @XmlAttribute
     private String currency;
 
     /**
@@ -31,5 +33,6 @@ public class CurrencyRatesRequest {
      */
     @Max(168)
     @Positive
+    @XmlAttribute
     private Integer period;
 }

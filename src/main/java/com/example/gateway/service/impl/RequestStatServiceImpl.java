@@ -33,11 +33,11 @@ public class RequestStatServiceImpl implements RequestStatService {
 
     @Transactional
     @Override
-    public void saveRequestStat(CurrencyRatesRequest request, ServiceName serviceName) {
+    public void saveRequestStat(String requestId, String clientId, Long timestamp, ServiceName serviceName) {
         RequestStat stat = RequestStat.builder()
-                .requestId(request.getRequestId())
-                .clientID(request.getClient())
-                .timestamp(Instant.ofEpochMilli(request.getTimestamp()))
+                .requestId(requestId)
+                .clientID(clientId)
+                .timestamp(timestamp != null ? Instant.ofEpochMilli(timestamp) : Instant.now())
                 .serviceName(serviceName).build();
 
         LOGGER.debug("Saving request stat: {}.", stat);

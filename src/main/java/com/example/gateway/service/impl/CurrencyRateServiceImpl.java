@@ -5,6 +5,7 @@ import com.example.gateway.dto.response.CurrencyRatesAtGivenTimestamp;
 import com.example.gateway.dto.response.CurrentCurrencyRatesResponse;
 import com.example.gateway.dto.response.FixerResponse;
 import com.example.gateway.dto.response.HistoryCurrencyRatesResponse;
+import com.example.gateway.dto.response.TargetCurrencyPrice;
 import com.example.gateway.entity.CurrencyRate;
 import com.example.gateway.exception.ResourceNotFoundException;
 import com.example.gateway.repository.CurrencyRateRepository;
@@ -15,13 +16,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Service
 public class CurrencyRateServiceImpl implements CurrencyRateService {
@@ -60,7 +62,7 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
             currencyRateRepository.saveAll(currencyRates);
             LOGGER.debug("Successfully saved currency rates for {} as of {}.", baseCurrency, timestampOfCurrencyRate);
         } catch (DataIntegrityViolationException _) { // todo: handle this exception in Global Exception Handler
-            LOGGER.error("Currency rates for {} as of {} already exist.", baseCurrency, timestampOfCurrencyRate);
+            LOGGER.warn("Currency rates for {} as of {} already exist.", baseCurrency, timestampOfCurrencyRate);
         }
     }
 
@@ -76,13 +78,13 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
             throw new ResourceNotFoundException(String.format("Currency %s does not exist.", baseCurrency));
         }
 
-        Map<String, BigDecimal> targetCurrenciesRates = new LinkedHashMap<>();
-        currencyRates.forEach(cr -> targetCurrenciesRates.put(cr.getTargetCurrency(), cr.getRate()));
+        Set<TargetCurrencyPrice> rates = new TreeSet<>(Comparator.comparing(TargetCurrencyPrice::getTargetCurrency));
+        currencyRates.forEach(cr -> rates.add(new TargetCurrencyPrice(cr.getTargetCurrency(), cr.getRate())));
 
         return CurrentCurrencyRatesResponse.builder()
                 .baseCurrency(baseCurrency)
                 .timestamp(currencyRates.getFirst().getTimestamp())
-                .rates(targetCurrenciesRates)
+                .rates(rates)
                 .build();
     }
 
@@ -102,11 +104,16 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
 
         List<CurrencyRate> currencyRates = currencyRateRepository.findByBaseCurrencyAndTimestampBetweenOrderByTimestampDesc(baseCurrency, from, to);
 
-        Map<Instant, Map<String, BigDecimal>> ratesByTimestamp = new LinkedHashMap<>();
+        Map<Instant, Set<TargetCurrencyPrice>> ratesByTimestamp = new LinkedHashMap<>();
 
         for (CurrencyRate currencyRate : currencyRates) {
-            ratesByTimestamp.putIfAbsent(currencyRate.getTimestamp(), new TreeMap<>());
-            ratesByTimestamp.get(currencyRate.getTimestamp()).put(currencyRate.getTargetCurrency(), currencyRate.getRate());
+            ratesByTimestamp.putIfAbsent(
+                    currencyRate.getTimestamp(),
+                    new TreeSet<>(Comparator.comparing(TargetCurrencyPrice::getTargetCurrency))
+            );
+
+            ratesByTimestamp.get(currencyRate.getTimestamp())
+                    .add(new TargetCurrencyPrice(currencyRate.getTargetCurrency(), currencyRate.getRate()));
         }
 
         List<CurrencyRatesAtGivenTimestamp> ratesAt = ratesByTimestamp.entrySet().stream()

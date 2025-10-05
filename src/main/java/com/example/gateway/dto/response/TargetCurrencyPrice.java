@@ -3,29 +3,25 @@ package com.example.gateway.dto.response;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
-import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "historyRates")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class HistoryCurrencyRatesResponse implements CurrencyRatesResponse {
+public class TargetCurrencyPrice {
 
     @XmlElement
-    private String baseCurrency;
+    private String targetCurrency;
 
-    @XmlElementWrapper(name = "history")
-    @XmlElement(name = "rateAt")
-    private List<CurrencyRatesAtGivenTimestamp> history;
+    @XmlElement
+    private BigDecimal price;
 }
