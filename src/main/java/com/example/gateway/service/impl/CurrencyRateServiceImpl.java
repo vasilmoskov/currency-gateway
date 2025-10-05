@@ -1,8 +1,10 @@
 package com.example.gateway.service.impl;
 
 import com.example.gateway.client.FixerClient;
+import com.example.gateway.dto.response.CurrencyRatesAtGivenTimestamp;
 import com.example.gateway.dto.response.CurrentCurrencyRatesResponse;
 import com.example.gateway.dto.response.FixerResponse;
+import com.example.gateway.dto.response.HistoryCurrencyRatesResponse;
 import com.example.gateway.entity.CurrencyRate;
 import com.example.gateway.exception.ResourceNotFoundException;
 import com.example.gateway.repository.CurrencyRateRepository;
@@ -15,9 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 public class CurrencyRateServiceImpl implements CurrencyRateService {
@@ -79,6 +83,43 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
                 .baseCurrency(baseCurrency)
                 .timestamp(currencyRates.getFirst().getTimestamp())
                 .rates(targetCurrenciesRates)
+                .build();
+    }
+
+    @Override
+    public HistoryCurrencyRatesResponse getHistoryRatesForCurrency(String baseCurrency, Integer period) {
+        LOGGER.debug("Validating whether {} exist as base currency.", baseCurrency);
+
+        if (!currencyRateRepository.existsCurrencyRateByBaseCurrency(baseCurrency)) {
+            // todo: handle in Global Exception Handler
+            throw new ResourceNotFoundException(String.format("Currency %s does not exist.", baseCurrency));
+        }
+
+        LOGGER.debug("Fetching history currency rates for {} for the past {} hours.", baseCurrency, period);
+
+        Instant to = Instant.now();
+        Instant from = to.minus(period, ChronoUnit.HOURS);
+
+        List<CurrencyRate> currencyRates = currencyRateRepository.findByBaseCurrencyAndTimestampBetweenOrderByTimestampDesc(baseCurrency, from, to);
+
+        Map<Instant, Map<String, BigDecimal>> ratesByTimestamp = new LinkedHashMap<>();
+
+        for (CurrencyRate currencyRate : currencyRates) {
+            ratesByTimestamp.putIfAbsent(currencyRate.getTimestamp(), new TreeMap<>());
+            ratesByTimestamp.get(currencyRate.getTimestamp()).put(currencyRate.getTargetCurrency(), currencyRate.getRate());
+        }
+
+        List<CurrencyRatesAtGivenTimestamp> ratesAt = ratesByTimestamp.entrySet().stream()
+                .map(e -> CurrencyRatesAtGivenTimestamp
+                        .builder()
+                        .timestamp(e.getKey())
+                        .rates(e.getValue())
+                        .build())
+                .toList();
+
+        return HistoryCurrencyRatesResponse.builder()
+                .baseCurrency(baseCurrency)
+                .history(ratesAt)
                 .build();
     }
 }

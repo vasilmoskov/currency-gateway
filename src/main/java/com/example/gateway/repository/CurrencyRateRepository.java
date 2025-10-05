@@ -6,10 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Repository
 public interface CurrencyRateRepository extends JpaRepository<CurrencyRate, Long> {
+
+    boolean existsCurrencyRateByBaseCurrency(String baseCurrency);
 
     @Query("""
             SELECT cr
@@ -22,4 +25,6 @@ public interface CurrencyRateRepository extends JpaRepository<CurrencyRate, Long
             )
             """)
     List<CurrencyRate> findLatestRatesByBaseCurrency(@Param("baseCurrency") String baseCurrency);
+
+    List<CurrencyRate> findByBaseCurrencyAndTimestampBetweenOrderByTimestampDesc(String baseCurrency, Instant from, Instant to);
 }
