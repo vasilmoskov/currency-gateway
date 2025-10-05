@@ -33,9 +33,8 @@ public class JsonCurrencyRateController {
     }
 
     @PostMapping(value = "/current")
-    public ResponseEntity<CurrentCurrencyRatesResponse> current(@RequestBody CurrencyRatesRequest requestBody) {
+    public ResponseEntity<CurrentCurrencyRatesResponse> current(@Valid @RequestBody CurrencyRatesRequest requestBody) {
         if (requestStatService.isRequestExisting(requestBody.getRequestId())) {
-            // todo: handle in Global Exception Handler
             throw new ResourceAlreadyExistsException(
                     String.format("Request with id %s already exists.", requestBody.getRequestId()));
         }
@@ -49,10 +48,7 @@ public class JsonCurrencyRateController {
 
     @PostMapping(value = "/history")
     public ResponseEntity<HistoryCurrencyRatesResponse> history(@Valid @RequestBody CurrencyRatesRequest requestBody) {
-        // todo: handle MethodArgumentNotValidException in Exception Handler
-
         if (requestStatService.isRequestExisting(requestBody.getRequestId())) {
-            // todo: handle in Global Exception Handler
             throw new ResourceAlreadyExistsException(
                     String.format("Request with id %s already exists.", requestBody.getRequestId()));
         }

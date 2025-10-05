@@ -13,15 +13,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CurrencyRatesRequest {
-    @NotBlank
+    @NotBlank(message = "Request ID must not be null or empty.")
     private String requestId;
 
     private Long timestamp;
 
-    @NotBlank
+    @NotBlank(message = "Client must not be null or empty.")
     private String client;
 
-    @NotBlank
+    @NotBlank(message = "Currency must not be null or empty.")
     private String currency;
 
     /**
@@ -29,7 +29,7 @@ public class CurrencyRatesRequest {
      * A maximum of 168 hours (7 days) is allowed to prevent excessive database load
      * in case a user provides very large value.
      */
-    @Max(168)
-    @Positive
+    @Max(value = 168, message = "Period must be at most 168 hours.")
+    @Positive(message = "Period must be a positive number.")
     private Integer period;
 }

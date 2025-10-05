@@ -17,11 +17,11 @@ import lombok.Setter;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class GetRequest {
 
-    @NotBlank
+    @NotBlank(message = "Consumer must not be null or empty.")
     @XmlAttribute
     private String consumer;
 
-    @NotBlank
+    @NotBlank(message = "Currency must not be null or empty.")
     @XmlElement
     private String currency;
 }

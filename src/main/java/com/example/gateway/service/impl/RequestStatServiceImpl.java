@@ -1,6 +1,5 @@
 package com.example.gateway.service.impl;
 
-import com.example.gateway.dto.request.CurrencyRatesRequest;
 import com.example.gateway.entity.RequestStat;
 import com.example.gateway.repository.RequestStatRepository;
 import com.example.gateway.service.RequestStatService;

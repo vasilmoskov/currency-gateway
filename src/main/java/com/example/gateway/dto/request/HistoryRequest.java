@@ -18,11 +18,11 @@ import lombok.Setter;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class HistoryRequest {
 
-    @NotBlank
+    @NotBlank(message = "Consumer must not be null or empty.")
     @XmlAttribute
     private String consumer;
 
-    @NotBlank
+    @NotBlank(message = "Currency must not be null or empty.")
     @XmlAttribute
     private String currency;
 
@@ -31,8 +31,8 @@ public class HistoryRequest {
      * A maximum of 168 hours (7 days) is allowed to prevent excessive database load
      * in case a user provides very large value.
      */
-    @Max(168)
-    @Positive
+    @Max(value = 168, message = "Period must be at most 168 hours.")
+    @Positive(message = "Period must be a positive number.")
     @XmlAttribute
     private Integer period;
 }

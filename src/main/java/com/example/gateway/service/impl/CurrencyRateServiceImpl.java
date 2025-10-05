@@ -61,7 +61,7 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
         try {
             currencyRateRepository.saveAll(currencyRates);
             LOGGER.debug("Successfully saved currency rates for {} as of {}.", baseCurrency, timestampOfCurrencyRate);
-        } catch (DataIntegrityViolationException _) { // todo: handle this exception in Global Exception Handler
+        } catch (DataIntegrityViolationException _) {
             LOGGER.warn("Currency rates for {} as of {} already exist.", baseCurrency, timestampOfCurrencyRate);
         }
     }
@@ -74,7 +74,6 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
         List<CurrencyRate> currencyRates = currencyRateRepository.findLatestRatesByBaseCurrency(baseCurrency);
 
         if (currencyRates.isEmpty()) {
-            // todo: handle in Global Exception Handler
             throw new ResourceNotFoundException(String.format("Currency %s does not exist.", baseCurrency));
         }
 
@@ -93,7 +92,6 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
         LOGGER.debug("Validating whether {} exist as base currency.", baseCurrency);
 
         if (!currencyRateRepository.existsCurrencyRateByBaseCurrency(baseCurrency)) {
-            // todo: handle in Global Exception Handler
             throw new ResourceNotFoundException(String.format("Currency %s does not exist.", baseCurrency));
         }
 

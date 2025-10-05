@@ -39,7 +39,6 @@ public class XmlCurrencyRateController {
     public ResponseEntity<CurrencyRatesResponse> command(@Valid @RequestBody CurrencyCommandRequest requestBody) {
 
         if (requestStatService.isRequestExisting(requestBody.getId())) {
-            // todo: handle in Global Exception Handler
             throw new ResourceAlreadyExistsException(
                     String.format("Request with id %s already exists.", requestBody.getId()));
         }
