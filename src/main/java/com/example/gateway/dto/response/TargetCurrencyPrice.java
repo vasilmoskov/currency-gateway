@@ -11,6 +11,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -29,16 +30,37 @@ public class TargetCurrencyPrice implements Comparable<TargetCurrencyPrice>{
 
     @Override
     public int compareTo(TargetCurrencyPrice o) {
-        return this.targetCurrency.compareTo(o.getTargetCurrency());
+        if (this.targetCurrency == null || this.price == null || o.targetCurrency == null || o.price == null) {
+            throw new IllegalArgumentException("Target currencies and prices should not be null.");
+        }
+
+        int currencyComparison = this.targetCurrency.compareTo(o.targetCurrency);
+
+        if (currencyComparison != 0) {
+            return currencyComparison;
+        }
+
+        return this.price.compareTo(o.price);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj);
+        if (this == obj) {
+            return true;
+        }
+
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        TargetCurrencyPrice other = (TargetCurrencyPrice) obj;
+
+        return Objects.equals(targetCurrency, other.targetCurrency) &&
+                Objects.equals(price, other.price);
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return Objects.hash(targetCurrency, price);
     }
 }

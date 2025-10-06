@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +78,7 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
             throw new ResourceNotFoundException(String.format("Currency %s does not exist.", baseCurrency));
         }
 
-        Set<TargetCurrencyPrice> rates = new TreeSet<>(Comparator.comparing(TargetCurrencyPrice::getTargetCurrency));
+        Set<TargetCurrencyPrice> rates = new TreeSet<>();
         currencyRates.forEach(cr -> rates.add(new TargetCurrencyPrice(cr.getTargetCurrency(), cr.getRate())));
 
         return CurrentCurrencyRatesResponse.builder()
@@ -109,10 +108,7 @@ public class CurrencyRateServiceImpl implements CurrencyRateService {
         Map<Instant, Set<TargetCurrencyPrice>> ratesByTimestamp = new LinkedHashMap<>();
 
         for (CurrencyRate currencyRate : currencyRates) {
-            ratesByTimestamp.putIfAbsent(
-                    currencyRate.getTimestamp(),
-                    new TreeSet<>(Comparator.comparing(TargetCurrencyPrice::getTargetCurrency))
-            );
+            ratesByTimestamp.putIfAbsent(currencyRate.getTimestamp(), new TreeSet<>());
 
             ratesByTimestamp.get(currencyRate.getTimestamp())
                     .add(new TargetCurrencyPrice(currencyRate.getTargetCurrency(), currencyRate.getRate()));
